@@ -12,7 +12,4 @@ yum install -y gcc-c++ make
 # Install PM2 globally
 npm install -g pm2
 
-# Create application directory
-mkdir -p /opt/app
-
 echo "Before install completed"
