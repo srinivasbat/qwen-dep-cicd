@@ -3,9 +3,8 @@ const path = require('path');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
-const rateLimit = require('express-rate-limit');
 const dotenv = require('dotenv');
-const mongoose = require('mongoose'); // Add this import
+const mongoose = require('mongoose');
 
 // Load environment variables
 dotenv.config();
@@ -26,16 +25,17 @@ const PORT = process.env.PORT || 3000;
 // Connect to database
 connectDB();
 
-// Security middleware
-app.use(helmet());
-app.use(cors());
+// Security middleware - Configure for AWS Load Balancer
+app.set('trust proxy', 1); // Trust the proxy (Load Balancer)
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
-});
-app.use(limiter);
+// CORS configuration - Allow requests from your domain
+const corsOptions = {
+  origin: ['god-alb-1965341985.us-east-2.elb.amazonaws.com', 'http://localhost:3000'], // Add your actual domain
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
 
 // Logging middleware
 app.use(morgan('combined', { stream: logger.stream }));
@@ -54,14 +54,21 @@ app.use('/', webRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.status(200).json({
+  const healthCheck = {
     status: 'OK',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
     memory: process.memoryUsage(),
-    version: require('./package.json').version,
-    database: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected' // This will now work
-  });
+    version: require('./package.json').version
+  };
+
+  if (mongoose.connection.readyState === 1) {
+    healthCheck.database = 'Connected';
+    res.status(200).json(healthCheck);
+  } else {
+    healthCheck.database = 'Disconnected';
+    res.status(200).json(healthCheck);
+  }
 });
 
 // Serve frontend from build folder
