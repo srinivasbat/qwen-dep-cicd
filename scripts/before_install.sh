@@ -12,13 +12,7 @@ yum install -y gcc-c++ make
 # Install PM2 globally
 npm install -g pm2
 
-# Install nodemon globally
-npm install -g nodemon
-
-# Set PM2 to start automatically on system startup
-pm2 startup systemd
-
-# Create application directory (if it doesn't exist)
-mkdir -p /home/ec2-user/app
+# Create application directory
+mkdir -p /opt/app
 
 echo "Before install completed"

@@ -1,10 +1,12 @@
 #!/bin/bash
-cd /home/ec2-user/app
+cd /opt/app
 
 # Install production dependencies only
-npm ci --only=production
+sudo npm ci --only=production
 
-# The build folder is already deployed by CodeDeploy
-# Logs folder will be created automatically by the application
+# Ensure build directory exists
+if [ ! -d "build" ]; then
+  echo "Warning: No pre-built files found"
+fi
 
 echo "After install completed"
