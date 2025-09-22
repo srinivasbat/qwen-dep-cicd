@@ -1,8 +1,8 @@
 #!/bin/bash
-cd /opt/app
+cd /home/ec2-user/app
 
 # Install production dependencies only
-sudo npm ci --only=production
+sudo -E npm ci --only=production
 
 # Ensure build directory exists
 if [ ! -d "build" ]; then
